@@ -6,6 +6,16 @@
 #include <glm/vec3.hpp>
 #include "resource_handler_structs.h"
 
+#ifdef DIRECTX12
+
+#include <wrl.h>
+#include <d3d12.h>
+#include <d3d12sdklayers.h>
+#include <dxgi1_6.h>
+
+using Microsoft::WRL::ComPtr;
+#endif
+
 struct Vertex
 {
 	glm::vec3 position{ 0,0,0 };
@@ -18,9 +28,16 @@ struct Vertex
 
 struct MeshGPU
 {
+    int vert_count = 0;
+#ifdef OPENGL
 	GLuint vao = 0;
 	GLuint vbo = 0;
-	int vert_count = 0;
+#else if DIRECTX12
+    ComPtr<ID3D12Resource> vertex_buffer;
+    D3D12_VERTEX_BUFFER_VIEW vertex_buffer_view;
+    ComPtr<ID3D12Resource> index_buffer;
+    D3D12_INDEX_BUFFER_VIEW index_buffer_view;
+#endif
 };
 
 
@@ -77,6 +94,27 @@ struct RenderContextData
 	GLFWwindow* window;
 	glm::ivec2 resolution{ 1280,720 };
 	bool fullscreen = false;
+#ifdef DIRECTX12
+    inline static constexpr int backbuffer_count = 2;
+    HWND hwnd{};
+    ComPtr<IDXGIFactory4> factory;
+#ifdef _DEBUG
+    ComPtr<ID3D12Debug1> debug_interface;
+    ComPtr<ID3D12DebugDevice> device_debug;
+    ComPtr<ID3D12Debug> debug_layer;
+#endif
+    ComPtr<ID3D12Device> device;
+    ComPtr<ID3D12DescriptorHeap> rtv_heap;
+    ComPtr<ID3D12CommandQueue> command_queue;
+    ComPtr<IDXGISwapChain3> swapchain;
+    ComPtr<ID3D12Resource> render_targets[backbuffer_count];
+    ComPtr<ID3D12Fence> fences[backbuffer_count];
+    D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc;
+    DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
+    UINT frame_index;
+    UINT rtv_desc_size;
+    UINT dxgi_factory_flags = 0;
+#endif
 };
 
 enum class ShaderType
@@ -113,7 +151,17 @@ enum class ConstantBufferType
 
 struct ConstantBufferGPU
 {
+#ifdef OPENGL
 	GLuint handle = 0;
+#else if DIRECTX12
+
+#endif
+    ComPtr<ID3D12DescriptorHeap> heap;
+    ComPtr<ID3D12Resource> resource;
+    void* data;
+    size_t size;
+    D3D12_CONSTANT_BUFFER_VIEW_DESC view_desc;
+    D3D12_RANGE range;
 };
 
 struct ModelRenderComponent

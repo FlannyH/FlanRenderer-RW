@@ -126,7 +126,7 @@ void Renderer::create_render_context()
 	render_ctx.window = glfwCreateWindow(
 		render_ctx.resolution.x,
 		render_ctx.resolution.y, 
-		"FlanRenderer-RW", 
+		"FlanRenderer-RW (OpenGL)", 
 		nullptr, 
 		nullptr);
 

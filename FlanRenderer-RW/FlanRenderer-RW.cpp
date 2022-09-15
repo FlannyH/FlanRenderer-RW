@@ -98,7 +98,7 @@ int main()
 	renderer.curr_cubemap = renderer.upload_cubemap_to_gpu(cubemap_handles, true);
 
 	//Load model for testing purposes
-	ResourceHandle handle_goomboss = resource_manager.load_resource_from_disk<ModelResource>("Assets/Models/gun.gltf");
+	ResourceHandle handle_goomboss = resource_manager.load_resource_from_disk<ModelResource>("Assets/Models/kelp.gltf");
 	ModelGPU model_gpu_goomboss = renderer.upload_mesh_to_gpu(handle_goomboss);
 
 	float move_speed = 2.0f;
